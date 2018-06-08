@@ -6,8 +6,8 @@ TEST_PATH=../machine-tasks/LookupTables/lookup-3bit/samples/sample1/new_composit
 EXPT_DIR=example
 
 # set values
-EMB_SIZE=128
-H_SIZE=128
+EMB_SIZE=16
+H_SIZE=512
 N_LAYERS=1
 CELL='gru'
 EPOCH=80
