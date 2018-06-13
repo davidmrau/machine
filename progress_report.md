@@ -27,31 +27,30 @@ This can be seen by inspecting the parameter distribution plots:
 
 - **decoder.attention.method.out.weight** for baseline model accumulated around zero. For guided model less weights arounds zero and weights are more spread out.
 
-![GRU attention](machine/images/distribution/hist\_Baseline\_GRU\_decoder.attention.method.out.weight.png)
+![GRU attention](images/distribution/hist\_Baseline\_GRU\_decoder.attention.method.out.weight.png)
 
 - **decoder.embedding.weight** for baseline model values accumulate around 0 and +-0.25, whereas for the guided model values are more spread out. Peak around +-0.1.
 
-![GRU embedding](machine/images/distribution/hist\_Baseline\_GRU\_decoder.embedding.weight.png)
+![GRU embedding](images/distribution/hist\_Baseline\_GRU\_decoder.embedding.weight.png)
 
 Heatmaps
 
 
 - **decoder.embedding.weight** for both models neuron two seems to encode imporant information. For the baseline model the weights from neuron 3-11 are around zer. For the Guided model those neurons the values differ a lot and seem to encode information which the baseline model was not able to encode.
 
-![GRU embedding heat](machine/images/heatmap/Guided\_GRU\_3\_decoder.embedding.weight.png)
+![GRU embedding heat](images/heatmap/Guided\_GRU\_3\_decoder.embedding.weight.png)
 
-![GRU embedding heat](machine/images/heatmap/Baseline\_GRU\_3\_decoder.embedding.weight.png)
-
+![GRU embedding heat](images/heatmap/Baseline\_GRU\_3\_decoder.embedding.weight.png)
 
 
 
 - **decoder.attention.method.mlp.weight** more noisy for Guided vs. Baseline
 
 
-![GRU embedding heat](machine/images/heatmap/Guided\_LSTM\_4\_decoder.attention.method.mlp.weight.png)
+![GRU embedding heat](images/heatmap/Guided\_LSTM\_4\_decoder.attention.method.mlp.weight.png)
 
 
-![GRU embedding heat](machine/images/heatmap/Baseline\_LSTM\_4\_decoder.attention.method.mlp.weight.png)
+![GRU embedding heat](images/heatmap/Baseline\_LSTM\_4\_decoder.attention.method.mlp.weight.png)
 
 
 - **decoder.out.bias** shows also a big difference in distribution of guided vs. baseline but also within each class. This also holds fo GRU and LSTM.
