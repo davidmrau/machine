@@ -14,12 +14,11 @@
 
 - Replaced parts of the network of guided vs. baseline models respectively.
 
-
-# Findigs:
  
 
 
 Compare distributions of parameters
+-
 
 - **decoder.embedding.weight**, **decoder.attention.method.out.weight** show biggest difference in distribution. This holds for both GRU and LSTM.
 
@@ -34,9 +33,9 @@ This can be seen by inspecting the parameter distribution plots:
 ![GRU embedding](images/distribution/hist\_Baseline\_GRU\_decoder.embedding.weight.png)
 
 Heatmaps
+-
 
-
-- **decoder.embedding.weight** for both models neuron two seems to encode imporant information. For the baseline model the weights from neuron 3-11 are around zer. For the Guided model those neurons the values differ a lot and seem to encode information which the baseline model was not able to encode.
+- **decoder.embedding.weight** . The first three rows decode for the tokens: 1. \<eos\>\<unk\> 2. \<pad\> 3. \<sos\>. F.or both models \<sos\> shows a really strong pattern. For the baseline model the weights from neuron 3-11 are around zero. For the Guided model those values differ a lot and seem to encode information.
 
 ![GRU embedding heat](images/heatmap/Guided\_GRU\_3\_decoder.embedding.weight.png)
 
@@ -44,8 +43,7 @@ Heatmaps
 
 
 
-- **decoder.attention.method.mlp.weight** more noisy for Guided vs. Baseline
-
+- **decoder.attention.method.mlp.weight** for some tows the guided model shows distinct lines which can't be found in any baseline heatmap
 
 ![GRU embedding heat](images/heatmap/Guided\_LSTM\_4\_decoder.attention.method.mlp.weight.png)
 
@@ -60,32 +58,79 @@ Heatmaps
 Classification
 -
 
-- layers for which the binary classification (guided/baseline) is >= 0.9
+For the classification both classes (guided/baseline) were whitened independently. This was done in order to find only non trivial differences in the two classes, such as mean or standart deviation of the parameters. As inputs for the training we used rows of the weight matrices as instances.
+
+- Layers for which the binary classification (guided/baseline) acc is \>= 0.9 on a network with 10 hidden layers, 2 outputs.
 
 LSTM:
 
-encoder.rnn.weight\_w\_hi, encoder.rnn.weight\_w\_hf, encoder.rnn.weight\_w\_hc, encoder.rnn.weight\_w\_ho, decoder.rnn.weight\_w\_ii, decoder.rnn.weight\_w\_if, decoder.rnn.weight\_w\_io, decoder.rnn.weight\_w\_hi, decoder.rnn.weight\_w\_hf, decoder.rnn.weight\_w\_ho, decoder.attention.method.mlp.weight
 
-GRU: 
 
-encoder.rnn.weight\_w\_hr,
-encoder.rnn.weight\_w\_hi,
-encoder.rnn.weight\_w\_hn,
-decoder.rnn.weight\_w\_ir,
-decoder.rnn.weight\_w\_ii,
-decoder.rnn.weight\_w\_hr,
-decoder.rnn.weight\_w\_hi,
-decoder.attention.method.mlp.weight,
+
+| Parameter | avg f1-score | feature size | training instances|
+| ---:|:----------------- |:---------------- |:------------------------ | 
+|encoder.embedding.weight |0.40 | 16 | 152 | 
+| encoder.rnn.weight\_w\_if | 0.79 | 16 | 4096 | 
+| encoder.rnn.weight\_w\_if | 0.84 | 16 |4096 |  
+| encoder.rnn.weight\_w\_ic | 0.49 | 16 |4096 |  
+|encoder.rnn.weight\_w\_io | 0.79 | 16 |4096 |  
+|encoder.rnn.weight\_w\_hi | 0.99| 512 |4096 |  
+|encoder.rnn.weight\_w\_hf | 0.97| 512 |4096 |  
+|encoder.rnn.weight\_w\_hc | 0.93| 512 |4096 |  
+|encoder.rnn.weight\_w\_ho | 0.98| 512 |4096 |  
+| decoder.rnn.weight\_w\_if | 0.90 | 512 | 4096 | 
+| decoder.rnn.weight\_w\_if | 0.88 | 512 |4096 |  
+| decoder.rnn.weight\_w\_ic | 0.94 | 412 |4096 |  
+|decoder.rnn.weight\_w\_io | 0.79 | 512 |4096 |  
+|decoder.rnn.weight\_w\_hi | 0.99| 512 |4096 |  
+|decoder.rnn.weight\_w\_hf | 0.97| 512 |4096 |  
+|decoder.rnn.weight\_w\_hc | 0.93| 512 |4096 |  
+|decoder.rnn.weight\_w\_ho | 0.98| 512 |4096 |  
+|decoder.embedding.weight | 0.50 |512 |88 | 
+|decoder.attention.method.mlp.weight | 0.98 | 1024 | 4096 |  
+
+
+
+
 
 
 Transfer learning
 -
 
-Take **decoder of guided model**, freeze weights and place it into **Baseline model**. Retrain hybrid model.
 
-- Acc heldout\_tables : **0.9010** (before baseline: 0.0000, guided: 0.8490)
+- Did swapping with baseline and AG models 1 from model zoo.
 
-- Acc new\_compositions: **0.8438** (before baseline: 0.0417, guided: 0.6875)
+- The letter represents the model being retrained (A for for a pre-trained AG model, again being retrained with AG, B for a pre-trained baseline model, again being retrained without AG). The name of the component represents the component taken from the opposite model and of which the weights have been frozen.
+
+
+
+
+| Model | Heldout compositions | Heldout inputs | Heldout tables | New compositions |
+| ---:| :------------------- |:-------------- |:-------------- |:---------------- |
+|  A-decoder| 0.4219 | 0.3250 | 0.2240 | 0.1875 |
+| A-encoder | 0.4531 | 0.3000 | 0.1094 | 0.0625 |
+| B-decoder | 0.1719 | 0.1750 | 0.0469 | 0.0312 |
+| B-encoder | 0.3125 | 0.3500 | 0.1198 | 0.000 |
+|A-decoder.embedding | 0.9375 | 0.9750 | 0.5417 | 0.25|
+|A-encoder.embedding | 1 | 1 | 0.8542 | 0.6875|
+| B-decoder.embedding |0.1719|0.1750|0.0469|0.0000 |
+| B-encoder.embedding | 	0.1719	| 0.1750 | 0.0521 | 0.0625 |
+| Baseline | 0.2500 |	0.2000	| 0.0417 |	0.0000|
+| Guided | 1.0000|1.0000 |	0.8490|	0.6875|
+
+
+Conclusions
+-
+
+- Token 2 (\<sos\>) in decoder.embedding seems to be very different from all other token embeddings in the weight heatmap
+
+- The decoder token embeddings for the actual bitstrings seem to be different for AG vs baseline in weight heatmap, and this also shows in the weight histogram comparison 
+
+- The encoder embeddings are not important for finding a compositional solution, because an AG model can be properly retrained with frozen encoder embeddings from the baseline
+
+- The decoder embeddings do seem to be important, since a retrained AG model can not reach the same performance with frozen decoder embeddings from the baseline 
+
+- The encoder does seem important for a compositional solution, since a frozen encoder from an AG model placed into a baseline model and retrained without AG beats all other baseline models
 
 
 
