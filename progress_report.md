@@ -43,7 +43,7 @@ Heatmaps
 
 
 
-- **decoder.attention.method.mlp.weight** for some tows the guided model shows distinct lines which can't be found in any baseline heatmap
+- **decoder.attention.method.mlp.weight** for some rows the guided model shows distinct lines which can't be found in any baseline heatmap
 
 ![GRU embedding heat](images/heatmap/Guided\_LSTM\_4\_decoder.attention.method.mlp.weight.png)
 
