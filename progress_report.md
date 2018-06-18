@@ -70,7 +70,7 @@ LSTM:
 | Parameter | avg f1-score | feature size | training instances|
 | ---:|:----------------- |:---------------- |:------------------------ | 
 |encoder.embedding.weight |0.40 | 16 | 152 | 
-| encoder.rnn.weight\_w\_if | 0.79 | 16 | 4096 | 
+| encoder.rnn.weight\_w\_ii | 0.79 | 16 | 4096 | 
 | encoder.rnn.weight\_w\_if | 0.84 | 16 |4096 |  
 | encoder.rnn.weight\_w\_ic | 0.49 | 16 |4096 |  
 |encoder.rnn.weight\_w\_io | 0.79 | 16 |4096 |  
@@ -78,9 +78,9 @@ LSTM:
 |encoder.rnn.weight\_w\_hf | 0.97| 512 |4096 |  
 |encoder.rnn.weight\_w\_hc | 0.93| 512 |4096 |  
 |encoder.rnn.weight\_w\_ho | 0.98| 512 |4096 |  
-| decoder.rnn.weight\_w\_if | 0.90 | 512 | 4096 | 
+| decoder.rnn.weight\_w\_ii | 0.90 | 512 | 4096 | 
 | decoder.rnn.weight\_w\_if | 0.88 | 512 |4096 |  
-| decoder.rnn.weight\_w\_ic | 0.94 | 412 |4096 |  
+| decoder.rnn.weight\_w\_ic | 0.94 | 512 |4096 |  
 |decoder.rnn.weight\_w\_io | 0.79 | 512 |4096 |  
 |decoder.rnn.weight\_w\_hi | 0.99| 512 |4096 |  
 |decoder.rnn.weight\_w\_hf | 0.97| 512 |4096 |  
