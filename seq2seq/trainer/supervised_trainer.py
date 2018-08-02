@@ -11,6 +11,8 @@ from torch import optim
 
 from collections import defaultdict
 
+import re
+
 import seq2seq
 from seq2seq.evaluator import Evaluator
 from seq2seq.loss import NLLLoss, AttentionLoss
@@ -59,17 +61,31 @@ class SupervisedTrainer(object):
         self.logger = logging.getLogger(__name__)
 
     def _train_batch(self, input_variable, input_lengths, target_variable, model, teacher_forcing_ratio):
+
+        def grad_to_zeros(param, grad):
+            scaler = param > 0
+            scaler = scaler.type(torch.FloatTensor)
+            return torch.mul(grad, scaler)
+
         loss = self.loss
 
         # Forward propagation
         decoder_outputs, decoder_hidden, other = model(input_variable, input_lengths, target_variable, teacher_forcing_ratio=teacher_forcing_ratio)
 
         losses = self.evaluator.compute_batch_loss(decoder_outputs, decoder_hidden, other, target_variable)
-        
+
         # Backward propagation
         for i, loss in enumerate(losses, 0):
             loss.scale_loss(self.loss_weights[i])
             loss.backward(retain_graph=True)
+            for child in model.children():
+                for param_name, param in child.named_parameters():
+                    if not re.search('bias', param_name):
+                        grad = param.grad
+                        #print(param_name,param, grad)
+                        grad = grad_to_zeros(param, grad)
+                        #print(param_name)
+                        param = param.grad.copy_(grad)
         self.optimizer.step()
         model.zero_grad()
 
@@ -217,7 +233,7 @@ class SupervisedTrainer(object):
         return logs
 
     def train(self, model, data, num_epochs=5,
-              resume=False, dev_data=None, 
+              resume=False, dev_data=None,
               monitor_data={}, optimizer=None,
               teacher_forcing_ratio=0,
               learning_rate=0.001, checkpoint_path=None, top_k=5):
@@ -300,7 +316,7 @@ class SupervisedTrainer(object):
                 # We need this if there are attentions of multiple lengths in a bath
                 attn_eos_indices = input_lengths.unsqueeze(1) + 1
                 attention_target = attention_target.scatter_(dim=1, index=attn_eos_indices, value=-1)
-                
+
                 # Next we also make sure that the longest attention sequence in the batch is truncated
                 attention_target = attention_target[:, :-1]
 

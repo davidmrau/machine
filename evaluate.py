@@ -66,6 +66,67 @@ if torch.cuda.is_available():
 logging.info("loading checkpoint from {}".format(os.path.join(opt.checkpoint_path)))
 checkpoint = Checkpoint.load(opt.checkpoint_path)
 seq2seq = checkpoint.model
+import pandas as pd
+
+def check_column(col, quant1, quant2):
+    #print(quant1, quant2, col.mean())
+    if col.mean()  > quant1  and col.mean() < quant2:
+        for i, val in enumerate(col):
+            # if val > -(threshold) or val < threshold:
+            col[i] = 0.
+    else:
+        print('keeping weights!')
+    return col
+def replace_with_zero_with_mean(model, param_name):
+    param = model.state_dict()[param_name].data
+    print(param_name)
+    param = pd.DataFrame(param.numpy())
+    print('before replacing with zero:', param[param==0].count().sum())
+    quant1 = param.mean().quantile(.1)
+    quant2 = param.mean().quantile(.9)
+    print(quant1, quant2)
+    param = param.apply(check_column, quant1=quant1,quant2=quant2, axis=0)
+    print('after', param[param==0].count().sum())
+    num_zero = param[param==0].count().sum()
+    dim = param.shape[0] * param.shape[1]
+    model.state_dict()[param_name].data.copy_(torch.FloatTensor( param.values, device=device))
+    print(model.state_dict()[param_name])
+    return dim, num_zero
+
+def replace_with_zero(model, param_name, threshold):
+    param = model.state_dict()[param_name].data
+    param = pd.DataFrame(param.numpy())
+    print(param_name)
+    print('before replacing with zero:', param[param==0].count().sum())
+    num_zero = param[param==0].count().sum()
+    #param = param.applymap(lambda i: i if i < -(threshold) or i > threshold else 0.)
+    #print('after', param[param==0].count().sum())
+    #print(param.shape)
+    dim = param.shape[0] * param.shape[1]
+    #model.state_dict()[param_name].data.copy_(torch.FloatTensor( param.values, device=device))
+    #print(model.state_dict()[param_name])
+    return dim, num_zero
+replace_with_zero(seq2seq,'decoder.rnn.weight_ih_l0', 0.1)
+# replace_with_zero(seq2seq,'decoder.rnn.weight_hh_l0', 0.1)
+import re
+
+num_zero =  0
+dim = 0
+
+
+def stat(param):
+    param = pd.DataFrame(param.data.numpy())
+    return param.shape[0]*param.shape[1], param[param==0].count().sum()
+
+
+for name, param in seq2seq.named_parameters():
+    d, nz = stat(param)
+    num_zero += nz
+    dim += d
+
+print('total weights zero: ', num_zero/dim)
+
+
 input_vocab = checkpoint.input_vocab
 output_vocab = checkpoint.output_vocab
 
